@@ -2,10 +2,12 @@ package com.siddhuja.userService.controller;
 
 import com.siddhuja.userService.service.UserLoginService;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@CrossOrigin(origins = "http://localhost")
 public class UserLoginController {
 
     private final UserLoginService userLoginService;

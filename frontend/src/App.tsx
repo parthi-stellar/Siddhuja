@@ -26,7 +26,8 @@ function App() {
     setState('loading')
     setError('')
     try {
-      const response = await fetch('/user-logins', { headers: { Accept: 'text/plain' } })
+      const apiBase = import.meta.env.VITE_API_BASE_URL ?? ''
+      const response = await fetch(`${apiBase}/user-logins`, { headers: { Accept: 'text/plain' } })
       if (!response.ok) throw new Error(`The server responded with ${response.status}.`)
       const body = await response.text()
       setUsers(parseLogins(body))
