@@ -16,6 +16,11 @@ function initials(username: string) {
 }
 
 function App() {
+  const [signedInAs, setSignedInAs] = useState('')
+  const [usernameInput, setUsernameInput] = useState('')
+  const [passwordInput, setPasswordInput] = useState('')
+  const [loginError, setLoginError] = useState('')
+  const [loginBusy, setLoginBusy] = useState(false)
   const [users, setUsers] = useState<UserLogin[]>([])
   const [state, setState] = useState<LoadState>('loading')
   const [error, setError] = useState('')
@@ -51,6 +56,36 @@ function App() {
     ? `Updated at ${lastUpdated.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`
     : 'Waiting for data'
 
+  async function signIn(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setLoginError('')
+    setLoginBusy(true)
+    try {
+      const apiBase = import.meta.env.VITE_API_BASE_URL ?? ''
+      const response = await fetch(`${apiBase}/user-login-controller/login`, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ username: usernameInput, password: passwordInput }) })
+      if (!response.ok) throw new Error(response.status === 401 ? 'Username or password is incorrect.' : 'Could not reach the sign-in service. Try again.')
+      const result = await response.json() as { username: string }
+      setSignedInAs(result.username)
+      setPasswordInput('')
+    } catch (cause) {
+      setLoginError(cause instanceof Error ? cause.message : 'Sign in failed. Try again.')
+    } finally { setLoginBusy(false) }
+  }
+
+  if (!signedInAs) return (
+    <main className="login-page"><div className="login-card">
+      <a className="brand login-brand" href="#home"><span className="brand-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3.5 19.2 12.8 28.5 16l-9.3 3.2L16 28.5l-3.2-9.3L3.5 16l9.3-3.2L16 3.5Z" fill="currentColor"/><circle cx="16" cy="16" r="2.4" fill="#fff"/></svg></span><span>northstar<span className="brand-period">.</span></span></a>
+      <div className="login-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg></div>
+      <p className="login-eyebrow">WELCOME BACK</p><h1>Sign in to your account</h1><p className="login-subtitle">Enter your username and password to continue.</p>
+      <form className="login-form" onSubmit={signIn}>
+        <label htmlFor="username">Username</label><input id="username" name="username" autoComplete="username" placeholder="Your username" value={usernameInput} onChange={(event) => setUsernameInput(event.target.value)} required />
+        <label htmlFor="password">Password</label><input id="password" name="password" type="password" autoComplete="current-password" placeholder="Enter your password" value={passwordInput} onChange={(event) => setPasswordInput(event.target.value)} required />
+        {loginError && <p className="login-error" role="alert">{loginError}</p>}
+        <button className="login-submit" type="submit" disabled={loginBusy}>{loginBusy ? 'Signing in…' : 'Sign in'}<span aria-hidden="true">→</span></button>
+      </form><p className="login-footnote">Secure access to your Northstar workspace</p>
+    </div></main>
+  )
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -65,7 +100,7 @@ function App() {
         </nav>
         <div className="sidebar-bottom">
           <div className="workspace-card"><span className="workspace-dot"/><div><strong>Workspace</strong><span>Personal account</span></div><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 8 3 3 3-3"/></svg></div>
-          <div className="profile"><div className="profile-avatar">S</div><div className="profile-copy"><strong>Siddhuja</strong><span>Administrator</span></div><button className="more-button" aria-label="More profile options">···</button></div>
+          <div className="profile"><div className="profile-avatar">{initials(signedInAs)}</div><div className="profile-copy"><strong>{signedInAs}</strong><span>Signed in</span></div><button className="more-button" onClick={() => setSignedInAs('')} aria-label="Sign out">↪</button></div>
         </div>
       </aside>
 

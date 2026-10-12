@@ -4,6 +4,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +20,7 @@ import lombok.Setter;
 public class UserLogin {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, length = 100)
@@ -23,7 +29,19 @@ public class UserLogin {
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    protected UserLogin() {
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
+
+    @Column(nullable = false)
+    private boolean enabled = true;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    public UserLogin() {
         // Required by JPA.
     }
 
@@ -32,4 +50,14 @@ public class UserLogin {
         this.username = username;
         this.email = email;
     }
+
+    @PrePersist
+    void onCreate() {
+        Instant now = Instant.now();
+        if (createdAt == null) createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    void onUpdate() { updatedAt = Instant.now(); }
 }

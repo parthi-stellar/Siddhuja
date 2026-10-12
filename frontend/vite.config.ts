@@ -6,6 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/user-logins': 'http://localhost:8080',
+      '/user-login-controller': 'http://localhost:8080',
     },
   },
 })
