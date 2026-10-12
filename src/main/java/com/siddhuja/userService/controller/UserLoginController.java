@@ -11,12 +11,16 @@ import org.springframework.http.ResponseEntity;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = {
+@CrossOrigin(originPatterns = {
         "http://localhost",
+        "http://localhost:*",
+        "https://localhost",
+        "https://localhost:*",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "capacitor://localhost",
-        "ionic://localhost"
+        "ionic://localhost",
+        "http://192.168.0.*:*"
 })
 public class UserLoginController {
 

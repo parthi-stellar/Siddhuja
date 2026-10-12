@@ -132,11 +132,14 @@ function App() {
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({ username, password }),
       })
-      if (!response.ok) throw new Error(response.status === 401 ? 'Username or password is incorrect.' : 'Could not reach the sign-in service. Try again.')
+      if (response.status === 401) throw new Error('Username or password is incorrect.')
+      if (!response.ok) throw new Error(`The sign-in service returned an error (${response.status}). Try again.`)
       setSignedIn(true)
       setPassword('')
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Sign in failed. Try again.')
+      setError(cause instanceof TypeError
+        ? 'Could not connect to the sign-in service. Check that the laptop and phone are on the same Wi-Fi and that the backend is running.'
+        : cause instanceof Error ? cause.message : 'Sign in failed. Try again.')
     } finally {
       setBusy(false)
     }
